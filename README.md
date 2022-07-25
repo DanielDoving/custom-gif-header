@@ -8,7 +8,9 @@ const GIPHY_API_KEY = '-- INSERT GIPHY KEY HERE --';
 
 ```
 
-2. Edit wordlist using `add_to_wordlist.php` and `remove_from_wordlist.php`
+2. Edit wordlist using `add_to_wordlist.php` and `remove_from_wordlist.php` (see below for usages)
+3. Include `custom_gif_header.inc.php` in development config
+4. Done
 
 
 ### Usage add_to_wordlist.php
