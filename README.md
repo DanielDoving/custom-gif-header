@@ -1,4 +1,4 @@
-# custom-gif-header
+# Custom GIF Development Header
 
 ## Setup
 1. Add Giphy API Key to `config.inc.php`
