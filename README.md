@@ -32,4 +32,4 @@ php remove_from_wordlist.php 'Example Keyword'
 
 ### custom.css
 
-You can add custom css rules to: `css/custom.css`
+You can add custom css rules to: `css/custom.css`. Some nice custom CSS rules are already provided.
