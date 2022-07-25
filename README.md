@@ -26,3 +26,8 @@ Arg1: Keyword/Query String
 ```bash
 php remove_from_wordlist.php 'Example Keyword'
 ```
+
+
+### custom.css
+
+You can add custom css rules to: `css/custom.css`
