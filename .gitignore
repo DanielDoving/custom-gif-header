@@ -1,1 +1,4 @@
 .idea/
+data/wordlist.json
+data/data.json
+config.inc.php
