@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/apikey.inc.php';
 /**
  * Path to where the current background data is stored
  */
