@@ -31,4 +31,4 @@ const MIN_WIDTH_COVER = 500;
 /**
  * Giphy API Key
  */
-const GIPHY_API_KEY = '-- INSERT GIPHY KEY HERE --'
+const GIPHY_API_KEY = '-- INSERT GIPHY KEY HERE --';
