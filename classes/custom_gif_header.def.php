@@ -4,6 +4,7 @@ require_once dirname(__DIR__) . '/config.inc.php';
 
 class custom_gif_header {
     private const GIPHY_API_BASE_URL = 'https://api.giphy.com/v1/gifs';
+    private const FALLBACK_HEADER_ATTR = 'style="background-color:#000000;color:white;background-position:center;">';
 
     private $giphy_api_key;
     private $wordlist;
@@ -59,7 +60,8 @@ class custom_gif_header {
             define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header" style="background-image:url(' . $background['url'] . ');' . $size . '">' . $info_span . $css ?? '');
         }
         else {
-            define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'style="background-color:#000000;color:white;background-position:center;">' . $info_span . $css);
+            $alert = "<script>$(document).ready(function (){Swal.fire('Warning', 'Giphy returned no results for Query \'$current_topic\'', 'warning');});</script>";
+            define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', self::FALLBACK_HEADER_ATTR . $info_span . $alert . $css);
         }
     }
 
@@ -115,7 +117,7 @@ class custom_gif_header {
 
         $response = file_get_contents($base_url . $query_string);
         $response = json_decode($response, true);
-        if (!isset($response['data'])) {
+        if (!isset($response['data']) || !$response['data']) {
             return false;
         }
         $response = $response['data'];
