@@ -56,8 +56,13 @@ class custom_gif_header {
 
         $info_span = '<a id="bg-info-span" href="' . $url . '">' . $current_topic . ' (' . $time_until_next . ')<a>';
         if ($background) {
-            $size = $background['cover'] ? 'background-size: cover;' : 'background-size: auto;';
-            define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header" style="background-image:url(' . $background['url'] . ');' . $size . '">' . $info_span . $css ?? '');
+            if ($background['video']) {
+                $background = '<video autoplay="" loop="" src="' . $background['url'] .'"></video>';
+                define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header">' . $background . $info_span . $css ?? '');
+            } else {
+                $size = $background['cover'] ? 'background-size: cover;' : 'background-size: auto;';
+                define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header" style="background-image:url(' . $background['url'] . ');' . $size . '">' . $info_span . $css ?? '');
+            }
         }
         else {
             $alert = "<script>$(document).ready(function (){Swal.fire('Warning', 'Giphy returned no results for Query \'$current_topic\'', 'warning');});</script>";
@@ -102,7 +107,6 @@ class custom_gif_header {
                 'q'       => $query,
                 'api_key' => $this->giphy_api_key,
                 'limit'   => $limit,
-                'bundle'  => 'clips_grid_picker'
             ]);
 
         }
@@ -111,12 +115,12 @@ class custom_gif_header {
             $query_string = http_build_query([
                 'tag'     => $query,
                 'api_key' => $this->giphy_api_key,
-                'bundle'  => 'clips_grid_picker'
             ]);
         }
 
         $response = file_get_contents($base_url . $query_string);
         $response = json_decode($response, true);
+
         if (!isset($response['data']) || !$response['data']) {
             return false;
         }
@@ -125,10 +129,23 @@ class custom_gif_header {
             shuffle($response);
             $response = $response[array_rand($response)];
         }
-        $response = $response['images']['original'];
+
+        $video = false;
+        $cover = true;
+        if (isset($response['images']['4k'])) {
+            $response = $response['images']['4k']['mp4'];
+            $video    = true;
+        } elseif (isset($response['images']['hd'])) {
+            $response = $response['images']['hd']['mp4'];
+            $video    = true;
+        } else {
+            $cover = $response['width'] >= MIN_WIDTH_COVER && ($response['width'] / $response['height']) > MIN_ASPECT_RATIO_COVER;
+            $response = $response['images']['original']['webp'];
+        }
         return [
-            'url'   => $response['webp'],
-            'cover' => $response['width'] >= MIN_WIDTH_COVER && ($response['width'] / $response['height']) > MIN_ASPECT_RATIO_COVER
+            'url'   => $response,
+            'cover' => $cover,
+            'video' => $video
         ];
     }
 }

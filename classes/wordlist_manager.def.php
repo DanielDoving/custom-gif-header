@@ -132,7 +132,7 @@ class wordlist_manager {
         if (isset($this->wordlist[$key]['limit'])) {
             return intval($this->wordlist[$key]['limit']) !== intval($limit);
         }
-        return $limit === DEFAULT_LIMIT;
+        return $limit !== DEFAULT_LIMIT;
     }
 
     private function save_wordlist(): bool {
