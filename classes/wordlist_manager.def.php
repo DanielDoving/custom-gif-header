@@ -49,10 +49,7 @@ class wordlist_manager {
      */
     private function find_word(string $needle) {
         foreach ($this->wordlist as $k => $word) {
-            if ($word === $needle) {
-                return $k;
-            }
-            elseif (isset($word['keyword']) && $word['keyword'] === $needle) {
+            if (strtoupper($word['keyword'] ?? $word) === strtoupper($needle)) {
                 return $k;
             }
         }
