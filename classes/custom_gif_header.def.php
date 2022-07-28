@@ -139,9 +139,11 @@ class custom_gif_header {
             $response = $response['images']['hd']['mp4'];
             $video    = true;
         } else {
-            $cover = $response['width'] >= MIN_WIDTH_COVER && ($response['width'] / $response['height']) > MIN_ASPECT_RATIO_COVER;
-            $response = $response['images']['original']['webp'];
+            $response = $response['images']['original'];
+            $cover    = $response['width'] >= MIN_WIDTH_COVER && ($response['width'] / $response['height']) > MIN_ASPECT_RATIO_COVER;
+            $response = $response['webp'];
         }
+
         return [
             'url'   => $response,
             'cover' => $cover,
