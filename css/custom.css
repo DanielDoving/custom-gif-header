@@ -34,18 +34,18 @@
 }
 
 #kt_header {
-  background-position: center;
+    background-position: center;
 }
 
 #kt_header > video {
-  position: absolute;
-  z-index: 0;
-  object-fit: cover;
-  width: 100vw;
-  height: 100%;
-  top: 49%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+    position: absolute;
+    z-index: 0;
+    object-fit: cover;
+    width: 100vw;
+    height: 100%;
+    top: 49%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 /*

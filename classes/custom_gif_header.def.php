@@ -57,9 +57,10 @@ class custom_gif_header {
         $info_span = '<a id="bg-info-span" href="' . $url . '">' . $current_topic . ' (' . $time_until_next . ')<a>';
         if ($background) {
             if ($background['video']) {
-                $background = '<video autoplay="" loop="" src="' . $background['url'] .'"></video>';
+                $background = '<video autoplay="" loop="" src="' . $background['url'] . '"></video>';
                 define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header">' . $background . $info_span . $css ?? '');
-            } else {
+            }
+            else {
                 $size = $background['cover'] ? 'background-size: cover;' : 'background-size: auto;';
                 define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header" style="background-image:url(' . $background['url'] . ');' . $size . '">' . $info_span . $css ?? '');
             }
@@ -135,10 +136,12 @@ class custom_gif_header {
         if (isset($response['images']['4k'])) {
             $response = $response['images']['4k']['mp4'];
             $video    = true;
-        } elseif (isset($response['images']['hd'])) {
+        }
+        elseif (isset($response['images']['hd'])) {
             $response = $response['images']['hd']['mp4'];
             $video    = true;
-        } else {
+        }
+        else {
             $response = $response['images']['original'];
             $cover    = $response['width'] >= MIN_WIDTH_COVER && ($response['width'] / $response['height']) > MIN_ASPECT_RATIO_COVER;
             $response = $response['webp'];
