@@ -37,3 +37,11 @@ You can add custom css rules to: `assets/css/custom.css`. Some nice custom CSS r
 ### custom.js
 
 Add custom JS to: `assets/js/custom.js`. It is recommended to leave the existing code (see comments in file)
+
+
+## Troubleshooting
+
+* Try deleting `data/data.json` it may have gotten corrupted
+* Check if your API-Key is valid
+
+
