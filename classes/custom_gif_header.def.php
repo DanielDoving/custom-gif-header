@@ -1,107 +1,134 @@
 <?php
 
-require_once __DIR__ . '/wordlist_manager.def.php';
-require_once dirname(__DIR__) . '/config.inc.php';
+namespace gif_header;
+
+use gif_header\query\query_response;
 
 class custom_gif_header {
-    private const GIPHY_API_BASE_URL = 'https://api.giphy.com/v1/gifs';
     private const FALLBACK_HEADER_ATTR = 'style="background-color:#000000;color:white;background-position:center;">';
+    private const PARAMETERS_TO_REDIRECT = [
+        'force_refresh_background',
+        'bg-keyword'
+    ];
 
-    private $giphy_api_key;
-    private $wordlist;
-    private $time_elapsed;
+    private int $time_elapsed;
+    private int $last_background_time;
+    private query_response $current_background;
+    private string $current_background_topic;
 
-    public function __construct() {
-        $this->giphy_api_key = GIPHY_API_KEY;
-        $this->wordlist      = json_decode(file_get_contents(WORDLIST_FILE), true);
+    private function read_data_file(): bool {
+        if (!file_exists(DATA_FILE)) {
+            touch(DATA_FILE);
+        }
+        $data_file_contents             = file_get_contents(DATA_FILE);
+        $data_file_contents             = json_decode($data_file_contents, true);
+        $this->last_background_time     = $data_file_contents['last-background-time'] ?? time();
+        $this->time_elapsed             = time() - $this->last_background_time;
+        $this->current_background_topic = $data_file_contents['current-background-topic'] ?? '';
+        $unserialized_background        = unserialize($data_file_contents['current-background'] ?? null);
+        if ($unserialized_background) {
+            $this->current_background = $unserialized_background;
+        }
+        return true;
     }
 
-    public function set_header($css = null, $js = null) {
+    private function save_data_file(query_response $query_response): void {
+        $content = [
+            'current-background'       => serialize($query_response),
+            'current-background-topic' => $this->current_background_topic,
+            'last-background-time'     => $this->last_background_time
+        ];
+        file_put_contents(DATA_FILE, json_encode($content, JSON_PRETTY_PRINT));
+    }
+
+    private function set_fallback_header(): void {
+        define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', self::FALLBACK_HEADER_ATTR);
+    }
+
+    private function get_special(): string {
+        $info            = '<strong>' . $this->current_background->get_special() . '</strong>';
+        $time_until_next = '<span id="countdown">' . ((NEW_BACKGROUND_INTERVAL - $this->time_elapsed) >= 0 ? NEW_BACKGROUND_INTERVAL - $this->time_elapsed : 0) . '</span>s';
+        return '<a id="bg-info-span">' . $info . htmlspecialchars($this->current_background_topic) . ' (' . $time_until_next . ')<a>';
+    }
+
+    public function set_header($css = null, $js = null): void {
         if (!mb_strpos($_SERVER['SCRIPT_FILENAME'], 'shop/Admin')) {
             return;
         }
         if (!file_exists(DATA_FILE)) {
             touch(DATA_FILE);
         }
-        $content = file_get_contents(DATA_FILE);
-        $content = json_decode($content, true);
-        if (!isset($content['last-background-time'])) {
-            $content['last-background-time'] = time();
-        }
-        $this->time_elapsed = time() - $content['last-background-time'];
-
-        $query = $this->get_random_keyword();
-        if (!isset($content['current-background']) || $this->is_new_bg_required()) {
-            $content['current-background']       = $this->query_giphy($query['keyword'], $query['limit']);
-            $content['last-background-time']     = time();
-            $content['current-background-topic'] = $query['keyword'];
+        if (!$this->read_data_file()) {
+            return;
         }
 
+        $special = '';
+        if ($this->is_new_bg_required()) {
+            $query          = $this->get_random_keyword();
+            $query_response = \gif_header\query\giphy::get_response($query['keyword'], $query['limit']);
+            if ($query_response->is_success()) {
+                $this->current_background       = $query_response;
+                $this->last_background_time     = time();
+                $this->current_background_topic = $query['keyword'];
+                $this->save_data_file($query_response);
+            }
+        }
+        $special = $this->get_special();
 
-        file_put_contents(DATA_FILE, json_encode($content, JSON_PRETTY_PRINT));
-        $background      = $content['current-background'];
-        $current_topic   = ucwords($content['current-background-topic'] ?? '');
-        $time_until_next = '<span id="countdown">' . ((NEW_BACKGROUND_INTERVAL - $this->time_elapsed) >= 0 ? NEW_BACKGROUND_INTERVAL - $this->time_elapsed : 0) . '</span>s';
+        $special       .= $js ?? '';
+        $special       .= $css ?? '';
+        $current_topic = ucwords($this->current_background_topic ?? '');
 
-        $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        if (mb_strpos($url, '?')) {
-            $url .= '&force_refresh_background=true';
-        }
-        else {
-            $url .= '?force_refresh_background=true';
-        }
-        // GET Param aus der url entfernen und redirecten
-        if (isset($_GET['force_refresh_background']) || isset($_GET['bg-keyword'])) {
-            $this->redirect_without_params($url);
+        foreach (self::PARAMETERS_TO_REDIRECT as $param) {
+            if (isset($_GET[$param])) {
+                $this->redirect_without_params();
+            }
         }
 
-        $info = '';
-        if ($background['video'] && $background['4k']) {
-            $info = '<strong>4K</strong>&nbsp;';
-        }
-        else if ($background['video']) {
-            $info = '<strong>HD</strong>&nbsp;';
-        }
-        $info_span = '<a id="bg-info-span">' . $info . $current_topic . ' (' . $time_until_next . ')<a>';
-        if ($background) {
-            if ($background['video']) {
-                $background = '<video autoplay="" loop="" src="' . $background['url'] . '"></video>';
-                define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header">' . $background . $info_span . ($js ?? '') . ($css ?? ''));
+        if (isset($this->current_background) && $this->current_background->is_success()) {
+            if ($this->current_background->is_video()) {
+                $background = '<video autoplay="" loop="" src="' . $this->current_background->get_url() . '"></video>';
+                define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header">' . $background . $special);
             }
             else {
-                $size = $background['cover'] ? 'background-size: cover;' : 'background-size: auto;';
-                define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header" style="background-image:url(' . $background['url'] . ');' . $size . '">' . $info_span . ($js ?? '') . ($css ?? ''));
+                $size = $this->current_background->is_cover() ? 'background-size: cover;' : 'background-size: auto;';
+                define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header" style="background-image:url(' . $this->current_background->get_url() . ');' . $size . '">' . $special);
             }
         }
         else {
             $alert = "<script>$(document).ready(function (){Swal.fire('Warning', 'Giphy returned no results for Query \'$current_topic\'', 'warning');});</script>";
-            define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', self::FALLBACK_HEADER_ATTR . $info_span . $alert . ($js ?? '') . ($css ?? ''));
+            define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', self::FALLBACK_HEADER_ATTR . $alert . $special);
         }
     }
 
-    private function is_new_bg_required() {
+    private function is_new_bg_required(): bool {
+        if (!isset($this->current_background)) {
+            return true;
+        }
         $force_refresh = isset($_GET['force_refresh_background']) && $_GET['force_refresh_background'] == 'true';
         return $this->time_elapsed > NEW_BACKGROUND_INTERVAL || $force_refresh || !empty($_GET['bg-keyword']);
     }
 
-    private function redirect_without_params($link) {
-        $link = preg_replace('~(\?|&)force_refresh_background=[^&]*~', '$1', $link);
-        $link = preg_replace('~(\?|&)bg-keyword=[^&]*~', '$1', $link);
-        $link = rtrim($link, '?&');
-        header('Location: ' . $link);
+    private function redirect_without_params(): void {
+        $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        foreach (self::PARAMETERS_TO_REDIRECT as $param) {
+            $url = preg_replace('~(\?|&)' . $param . '=[^&]*~', '$1', $url);
+        }
+        $url = rtrim($url, '?&');
+        header('Location: ' . $url);
     }
 
     private function get_random_keyword() {
+        $wl_manager = new wordlist_manager();
         if (!empty($_GET['bg-keyword'])) {
-            $wl_manager = new \wordlist_manager();
-            $key        = $wl_manager->find_word($_GET['bg-keyword']);
+            $key = $wl_manager->find_word($_GET['bg-keyword']);
             if ($key !== -1) {
-                if (isset($this->wordlist[$key]['limit'])) {
-                    return $this->wordlist[$key];
+                if (isset($wl_manager->wordlist[$key]['limit'])) {
+                    return $wl_manager->wordlist[$key];
                 }
                 else {
                     return [
-                        'keyword' => $this->wordlist[$key],
+                        'keyword' => $wl_manager->wordlist[$key],
                         'limit'   => DEFAULT_LIMIT
                     ];
                 }
@@ -111,70 +138,14 @@ class custom_gif_header {
                 'limit'   => 20
             ];
         }
-        shuffle($this->wordlist);
-        $result = $this->wordlist[array_rand($this->wordlist)];
+        shuffle($wl_manager->wordlist);
+        $result = $wl_manager->wordlist[array_rand($wl_manager->wordlist)];
         if (isset($result['limit'])) {
             return $result;
         }
         return [
             'keyword' => $result,
             'limit'   => DEFAULT_LIMIT
-        ];
-    }
-
-    private function query_giphy($query, $limit) {
-        if (!GIPHY_RANDOM_ENDPOINT) {
-            $base_url     = self::GIPHY_API_BASE_URL . '/search?';
-            $query_string = http_build_query([
-                'q'       => $query,
-                'api_key' => $this->giphy_api_key,
-                'limit'   => $limit,
-            ]);
-
-        }
-        else {
-            $base_url     = self::GIPHY_API_BASE_URL . '/random?';
-            $query_string = http_build_query([
-                'tag'     => $query,
-                'api_key' => $this->giphy_api_key,
-            ]);
-        }
-
-        $response = file_get_contents($base_url . $query_string);
-        $response = json_decode($response, true);
-
-        if (!isset($response['data']) || !$response['data']) {
-            return false;
-        }
-        $response = $response['data'];
-        if (!GIPHY_RANDOM_ENDPOINT) {
-            shuffle($response);
-            $response = $response[array_rand($response)];
-        }
-
-        $video = false;
-        $cover = true;
-        $uhd   = false;
-        if (isset($response['images']['4k'])) {
-            $response = $response['images']['4k']['mp4'];
-            $uhd      = true;
-            $video    = true;
-        }
-        elseif (isset($response['images']['hd'])) {
-            $response = $response['images']['hd']['mp4'];
-            $video    = true;
-        }
-        else {
-            $response = $response['images']['original'];
-            $cover    = $response['width'] >= MIN_WIDTH_COVER && ($response['width'] / $response['height']) > MIN_ASPECT_RATIO_COVER;
-            $response = $response['webp'];
-        }
-
-        return [
-            'url'   => $response,
-            'cover' => $cover,
-            'video' => $video,
-            '4k'    => $uhd,
         ];
     }
 }

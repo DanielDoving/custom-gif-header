@@ -1,7 +1,7 @@
 <?php
 
-require_once(__DIR__ . '/config.inc.php');
-include_once(__DIR__ . '/classes/custom_gif_header.def.php');
+require_once __DIR__  . '/autoload.php';
+
 
 $css_path = __DIR__ . '/css/custom.css';
 $js_path  = __DIR__ .'/js/gif_header.js';
@@ -18,6 +18,6 @@ if(file_exists($js_path)) {
 }
 
 
-(new \custom_gif_header())
+(new \gif_header\custom_gif_header())
     ->set_header($custom_css, $custom_js);
 

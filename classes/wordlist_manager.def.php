@@ -1,11 +1,11 @@
 <?php
 
-require_once dirname(__DIR__) . '/config.inc.php';
+namespace gif_header;
 
 class wordlist_manager {
 
     const WORDLIST_ERROR_MSG = 'ERROR: Could not write to wordlist!';
-    private $wordlist;
+    public array $wordlist;
 
     public function __construct() {
         if (!file_exists(WORDLIST_FILE)) {

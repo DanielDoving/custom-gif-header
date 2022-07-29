@@ -9,7 +9,6 @@ $(document).ready(function () {
             countdown();
         }, 1000)
     }
-
     countdown();
 
     $('#bg-info-span').on('click', function () {
