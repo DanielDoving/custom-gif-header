@@ -47,7 +47,7 @@ class wordlist_manager {
      * @param string $needle Word to search for
      * @return int|string Key if found otherwise -1
      */
-    private function find_word(string $needle) {
+    public function find_word(string $needle) {
         foreach ($this->wordlist as $k => $word) {
             if (strtoupper($word['keyword'] ?? $word) === strtoupper($needle)) {
                 return $k;

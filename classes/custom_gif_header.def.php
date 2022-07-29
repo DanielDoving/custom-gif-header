@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/wordlist_manager.def.php';
 require_once dirname(__DIR__) . '/config.inc.php';
 
 class custom_gif_header {
@@ -57,7 +58,8 @@ class custom_gif_header {
         $info = '';
         if ($background['video'] && $background['4k']) {
             $info = '<strong>4K</strong>&nbsp;';
-        } else if($background['video']) {
+        }
+        else if ($background['video']) {
             $info = '<strong>HD</strong>&nbsp;';
         }
         $info_span = '<a id="bg-info-span">' . $info . $current_topic . ' (' . $time_until_next . ')<a>';
@@ -68,7 +70,7 @@ class custom_gif_header {
             }
             else {
                 $size = $background['cover'] ? 'background-size: cover;' : 'background-size: auto;';
-                define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header" style="background-image:url(' . $background['url'] . ');' . $size . '">' . $info_span .($js ?? '') . ($css ?? ''));
+                define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header" style="background-image:url(' . $background['url'] . ');' . $size . '">' . $info_span . ($js ?? '') . ($css ?? ''));
             }
         }
         else {
@@ -91,9 +93,22 @@ class custom_gif_header {
 
     private function get_random_keyword() {
         if (!empty($_GET['bg-keyword'])) {
+            $wl_manager = new \wordlist_manager();
+            $key        = $wl_manager->find_word($_GET['bg-keyword']);
+            if ($key !== -1) {
+                if (isset($this->wordlist[$key]['limit'])) {
+                    return $this->wordlist[$key];
+                }
+                else {
+                    return [
+                        'keyword' => $this->wordlist[$key],
+                        'limit'   => DEFAULT_LIMIT
+                    ];
+                }
+            }
             return [
                 'keyword' => $_GET['bg-keyword'],
-                'limit'   => DEFAULT_LIMIT
+                'limit'   => 20
             ];
         }
         shuffle($this->wordlist);
