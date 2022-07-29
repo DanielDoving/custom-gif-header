@@ -1,4 +1,4 @@
-# PepperGIF: Custom Development Header
+# Random GIFs for Development Header
 
 ## Setup
 1. Add Giphy API Key to `config.inc.php`
