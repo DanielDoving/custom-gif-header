@@ -41,7 +41,7 @@ class custom_gif_header {
         file_put_contents(DATA_FILE, json_encode($content, JSON_PRETTY_PRINT));
         $background      = $content['current-background'];
         $current_topic   = ucwords($content['current-background-topic'] ?? '');
-        $time_until_next = ((NEW_BACKGROUND_INTERVAL - $this->time_elapsed) >= 0 ? NEW_BACKGROUND_INTERVAL - $this->time_elapsed : 0) . 's';
+        $time_until_next = '<span id="countdown">' . ((NEW_BACKGROUND_INTERVAL - $this->time_elapsed) >= 0 ? NEW_BACKGROUND_INTERVAL - $this->time_elapsed : 0) . '</span>s';
 
         $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         if (mb_strpos($url, '?')) {

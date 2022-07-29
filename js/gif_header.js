@@ -1,4 +1,17 @@
 $(document).ready(function () {
+    function countdown() {
+        const elem = $('#countdown');
+        if (parseInt(elem.text()) === 0) {
+            return;
+        }
+        setTimeout(function () {
+            elem.text(parseInt(elem.text()) - 1);
+            countdown();
+        }, 1000)
+    }
+
+    countdown();
+
     $('#bg-info-span').on('click', function () {
         Swal.fire({
                       title            : 'Change Keyword',
