@@ -46,9 +46,9 @@ class custom_gif_header {
     }
 
     private function get_special(): string {
-        $info            = '<strong>' . $this->current_background->get_special() . '</strong>';
+        $info            = '<strong>' . $this->current_background->get_special() . '</strong>&nbsp;';
         $time_until_next = '<span id="countdown">' . ((NEW_BACKGROUND_INTERVAL - $this->time_elapsed) >= 0 ? NEW_BACKGROUND_INTERVAL - $this->time_elapsed : 0) . '</span>s';
-        return '<a id="bg-info-span">' . $info . htmlspecialchars($this->current_background_topic) . ' (' . $time_until_next . ')<a>';
+        return '<a id="bg-info-span">' . $info . htmlspecialchars(strtoupper($this->current_background_topic)) . ' (' . $time_until_next . ')<a>';
     }
 
     public function set_header($css = null, $js = null): void {

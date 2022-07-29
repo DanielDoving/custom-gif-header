@@ -4,7 +4,7 @@ require_once __DIR__  . '/autoload.php';
 
 
 $css_path = __DIR__ . '/assets/css/custom.css';
-$js_path  = __DIR__ .'/assets/js/gif_header.js';
+$js_path  = __DIR__ .'/assets/js/custom.js';
 
 $custom_css = null;
 if (file_exists($css_path)) {
