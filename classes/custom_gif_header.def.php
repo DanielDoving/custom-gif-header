@@ -15,7 +15,7 @@ class custom_gif_header {
         $this->wordlist      = json_decode(file_get_contents(WORDLIST_FILE), true);
     }
 
-    public function set_header($css = null) {
+    public function set_header($css = null, $js = null) {
         if (!mb_strpos($_SERVER['SCRIPT_FILENAME'], 'shop/Admin')) {
             return;
         }
@@ -54,20 +54,26 @@ class custom_gif_header {
             $this->redirect_without_params($url);
         }
 
-        $info_span = '<a id="bg-info-span" href="' . $url . '">' . $current_topic . ' (' . $time_until_next . ')<a>';
+        $info = '';
+        if ($background['video'] && $background['4k']) {
+            $info = '<strong>4K</strong>&nbsp;';
+        } else if($background['video']) {
+            $info = '<strong>HD</strong>&nbsp;';
+        }
+        $info_span = '<a id="bg-info-span">' . $info . $current_topic . ' (' . $time_until_next . ')<a>';
         if ($background) {
             if ($background['video']) {
                 $background = '<video autoplay="" loop="" src="' . $background['url'] . '"></video>';
-                define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header">' . $background . $info_span . $css ?? '');
+                define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header">' . $background . $info_span . ($js ?? '') . ($css ?? ''));
             }
             else {
                 $size = $background['cover'] ? 'background-size: cover;' : 'background-size: auto;';
-                define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header" style="background-image:url(' . $background['url'] . ');' . $size . '">' . $info_span . $css ?? '');
+                define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', 'class="custom-gif-header" style="background-image:url(' . $background['url'] . ');' . $size . '">' . $info_span .($js ?? '') . ($css ?? ''));
             }
         }
         else {
             $alert = "<script>$(document).ready(function (){Swal.fire('Warning', 'Giphy returned no results for Query \'$current_topic\'', 'warning');});</script>";
-            define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', self::FALLBACK_HEADER_ATTR . $info_span . $alert . $css);
+            define('DEVELOPMENT_CUSTOM_ADMIN_HEADER_ATTR', self::FALLBACK_HEADER_ATTR . $info_span . $alert . ($js ?? '') . ($css ?? ''));
         }
     }
 
@@ -133,8 +139,10 @@ class custom_gif_header {
 
         $video = false;
         $cover = true;
+        $uhd   = false;
         if (isset($response['images']['4k'])) {
             $response = $response['images']['4k']['mp4'];
+            $uhd      = true;
             $video    = true;
         }
         elseif (isset($response['images']['hd'])) {
@@ -150,7 +158,8 @@ class custom_gif_header {
         return [
             'url'   => $response,
             'cover' => $cover,
-            'video' => $video
+            'video' => $video,
+            '4k'    => $uhd,
         ];
     }
 }
