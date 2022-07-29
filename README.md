@@ -9,7 +9,7 @@ const GIPHY_API_KEY = '-- INSERT GIPHY KEY HERE --';
 ```
 
 2. Edit wordlist using `tools/add_to_wordlist.php` and `tools/remove_from_wordlist.php` (see below for usages)
-3. Include `custom_gif_header.inc.php` in development config
+3. Include `custom_gif_header.inc.php` in `shop/custom_development_config.php`
 4. Done
 
 
@@ -32,7 +32,7 @@ php remove_from_wordlist.php 'Example Keyword'
 
 ### custom.css
 
-You can add custom css rules to: `assets/css/custom.css`. Some nice custom CSS rules are already provided.
+You can add custom css rules to: `assets/css/custom.css`. Some CSS rules are already provided. It is recommended to leave these rules
 
 ### custom.js
 
