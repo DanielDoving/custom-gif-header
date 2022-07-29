@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    // !!! LEAVE THIS !!!
     function countdown() {
         const elem = $('#countdown');
         if (parseInt(elem.text()) === 0) {
@@ -42,5 +43,9 @@ $(document).ready(function () {
             }
         });
     });
+
+    /* ----------------------------------------------------------------------
+     *  Add additional JS below this comment
+     ---------------------------------------------------------------------- */
 })
 
