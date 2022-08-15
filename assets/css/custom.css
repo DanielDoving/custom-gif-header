@@ -20,6 +20,9 @@
     blink-caret 1s step-end infinite;
     mix-blend-mode: difference;
     color: white;
+    font-size: 38px;
+    font-weight: 600;
+    letter-spacing: 16px;
 }
 
 #bg-info-span {
