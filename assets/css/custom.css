@@ -29,7 +29,7 @@
     opacity: 25%;
     font-size: 12px;
     position: absolute;
-    top: 44px;
+    top: 65px;
     right: 0;
     color: black;
     background-color: white;
@@ -62,6 +62,12 @@ span.menu-text > span:last-of-type {
     background-color: #1e1e2d;
     color: white;
     border-top-left-radius: 10px;
+}
+
+#shopversion,
+#help_link_in_header_top,
+#shop_link_in_header_top {
+  background-color: #ffffff;
 }
 
 /*
@@ -104,6 +110,6 @@ span.menu-text > span:last-of-type {
 
 @media (max-width: 992px) {
     #bg-info-span {
-        top: 34px;
+        top: 55px;
     }
 }
