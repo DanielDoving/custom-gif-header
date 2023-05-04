@@ -16,7 +16,7 @@
     white-space: nowrap;
     margin: 0;
     letter-spacing: .15em;
-    animation: typing 8s steps(7, end) infinite,
+    animation: typing 10s steps(7, end) infinite,
     blink-caret 1s step-end infinite;
     mix-blend-mode: difference;
     color: white;
@@ -36,11 +36,13 @@
     padding: 2px 6px 2px;
 }
 
-#kt_header {
+#kt_header,
+#kt_app_header {
     background-position: center;
 }
 
-#kt_header > video {
+#kt_header > video,
+#kt_app_header > video {
     position: absolute;
     z-index: 0;
     object-fit: cover;
@@ -50,6 +52,16 @@
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: -1;
+}
+
+span.menu-text > span:last-of-type {
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    padding: 8px 14px;
+    background-color: #1e1e2d;
+    color: white;
+    border-top-left-radius: 10px;
 }
 
 /*
